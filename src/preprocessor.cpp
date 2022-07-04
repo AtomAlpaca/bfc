@@ -7,7 +7,7 @@ namespace bfc
 		{
 			if (ptrPosition < 0)
 			{
-				std::cerr << "Error: Pointer out of range while moving left!\n";
+				std::cerr << "Error: Pointer out of range while moving left!" << std::endl;
 				exit(-1);
 			}
 			return ;
