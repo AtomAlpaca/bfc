@@ -56,6 +56,34 @@ namespace bfc
 			
 			tokens.push_back(lastToken);
 
+			long len 	= tokens.size();
+			long loopID {0};
+			std::stack <long> loops;
+
+			for (int i = 0; i < len; ++i)
+			{
+				Token & thisToken = tokens.at(i);
+				if (thisToken.tokenKind == ADD
+					and thisToken.operNumber == 0)
+				{
+					tokens.erase(tokens.begin() + i);
+					--i;
+					--len;
+				}
+				else if (thisToken.tokenKind == LOS)
+				{
+					thisToken.operNumber = loopID;
+					loops.push(loopID);
+					++loopID;
+				}
+				else if (thisToken.tokenKind == LOE)
+				{
+					thisToken.operNumber = loops.top();
+					loops.pop();
+				}
+
+			}
+
 			return tokens;
 		}
 	}
