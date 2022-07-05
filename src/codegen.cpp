@@ -8,27 +8,27 @@ namespace bfc
 		std::string codegen(std::vector <bfc::lexer::Token> tokenList)
 		{
 			std::string code;
-			code.append(std::string(   "	.text\n")
-									 + "	.globl	ch\n"
-									 + "	.bss\n"
-									 + "	.align	32\n"
-									 + "	.type	ch, @object\n"
-									 + "	.size	ch, 1000000\n"
+			code.append(std::string(   "	 .text\n")
+									 + "	 .globl	ch\n"
+									 + "	 .bss\n"
+									 + "	 .align	32\n"
+									 + "	 .type	ch, @object\n"
+									 + "	 .size	ch, 1000000\n"
 									 + "ch:\n"
-									 + "	.zero	1000000\n"
-									 + "	.globl	ptr\n"
-									 + "	.section	.data.rel.local,\"aw\"\n"
-									 + "	.align	8\n"
-									 + "	.type	ptr, @object\n"
-									 + "	.size	ptr, 8\n"
+									 + "	 .zero	1000000\n"
+									 + "	 .globl	ptr\n"
+									 + "	 .section	.data.rel.local,\"aw\"\n"
+									 + "	 .align	8\n"
+									 + "	 .type	ptr, @object\n"
+									 + "	 .size	ptr, 8\n"
 									 + "ptr:\n"
-									 + "	.quad	ch\n"
-									 + "	.text\n"
-									 + "	.globl	main\n"
-									 + "	.type	main, @function\n"
+									 + "	 .quad	ch\n"
+									 + "	 .text\n"
+									 + "	 .globl	main\n"
+									 + "	 .type	main, @function\n"
 									 + "main:\n"
-									 + "	pushq	%rbp\n"
-									 + "	movq	%rsp, %rbp");
+									 + "	 pushq	%rbp\n"
+									 + "	 movq	%rsp, %rbp\n");
 
 			const long length = tokenList.size();
 
@@ -66,19 +66,19 @@ namespace bfc
 				}
 				else if (thisToken.tokenKind == bfc::lexer::INP)
 				{
-					code.append("	movq	$0, \%rax\n");
-					code.append("	movq 	$0, \%rdi\n");
-					code.append("	movq 	ptr(\%rip), \%rsi\n");
-					code.append("	movq 	$1, \%rdx\n");
-					code.append("	syscall\n");
+					code.append(std::string("	 movq	$0, \%rax\n")
+							  			  + "	 movq 	$0, \%rdi\n"
+										  + "	 movq 	ptr(\%rip), \%rsi\n"
+										  + "	 movq 	$1, \%rdx\n"
+										  + "	 syscall\n");
 				}
 				else if (thisToken.tokenKind == bfc::lexer::OUP)
 				{
-					code.append("	movq	$1, \%rax\n");
-					code.append("	movq 	$1, \%rdi\n");
-					code.append("	movq 	ptr(\%rip), \%rsi\n");
-					code.append("	movq 	$1, \%rdx\n");
-					code.append("	syscall\n");
+					code.append(std::string("	 movq	$1, \%rax\n")
+										  + "	 movq 	$1, \%rdi\n"
+										  + "	 movq 	ptr(\%rip), \%rsi\n"
+										  + "	 movq 	$1, \%rdx\n"
+										  + "	 syscall\n");
 				}
 				else if (thisToken.tokenKind == bfc::lexer::LOS)
 				{
@@ -91,13 +91,6 @@ namespace bfc
 										  + "	 LOOP_START_"
 										  + std::to_string(thisToken.operNumber)
 										  + ":\n");
-					/*code.append("	cmpb 	$0, 	(ptr)\n");
-					code.append("	je 		LOOP_END_");
-					code.append(std::to_string(thisToken.operNumber));
-					code.append("\n");
-					code.append("	LOOP_START_");
-					code.append(std::to_string(thisToken.operNumber));
-					code.append(":\n");*/
 				}
 				else if (thisToken.tokenKind == bfc::lexer::LOE)
 				{
@@ -110,7 +103,6 @@ namespace bfc
 										  + "	 LOOP_END_"
 										  + std::to_string(thisToken.operNumber)
 										  + ":\n");
-
 				}
 				code.append("\n");
 			}
