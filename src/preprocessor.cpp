@@ -3,16 +3,6 @@ namespace bfc
 {
 	namespace preprocessor
 	{
-		void checkPtr(int ptrPosition)
-		{
-			if (ptrPosition < 0)
-			{
-				std::cerr << "Error: Pointer out of range while moving left!" << std::endl;
-				exit(-1);
-			}
-			return ;
-		}
-
 		void checkLoop(int loopDepth)
 		{
 			if (loopDepth < 0)
@@ -49,8 +39,7 @@ namespace bfc
 		std::string preProcess(std::string source)
 		{
 			const long length = source.length();
-			long ptrPosition {0},
-				 loopDepth   {0};
+			long loopDepth   {0};
 			std::string result {};
 
 			for (int i = 0; i < length; ++i)
@@ -63,16 +52,7 @@ namespace bfc
 
 				result.push_back(ch);
 
-				if (ch == '<')
-				{
-					--ptrPosition;
-					checkPtr(ptrPosition);
-				}
-				else if (ch == '>')
-				{
-					++ptrPosition;
-				}
-				else if (ch == '[')
+				if (ch == '[')
 				{
 					++loopDepth;
 				}
