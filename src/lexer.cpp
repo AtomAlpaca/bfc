@@ -4,7 +4,7 @@ namespace bfc
 {
 	namespace lexer
 	{
-		std::map <char, TokenKind> charKindList
+		const std::map <char, TokenKind> charKindList
 		{
 			std::make_pair('<', MOV),
 			std::make_pair('>', MOV),
@@ -16,74 +16,99 @@ namespace bfc
 			std::make_pair(']', LOE)
 		};
 
+		/*
+		bfc::lexer::getCharKind :: char -> TokenKind
+		*/
 		TokenKind getCharKind(char ch)
 		{
 			return charKindList.at(ch);
 		}
 
+		Token mergeToken(Token token, char ch)
+		{
+			if (ch == '<' or ch == '-')
+			{
+				return {token.tokenKind, token.operNumber - 1};
+			}
+			else if (ch == '>' or ch == '+')
+			{
+				return {token.tokenKind, token.operNumber + 1};
+			}
+			else
+			{
+				throw "Error: Enable to merge the char to this token";
+			}
+		}
+
+		bool isIgnorableToken(Token token)
+		{
+			if ((token.tokenKind == ADD or token.tokenKind == MOV)
+				and token.operNumber == 0)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		/*
+		bfc::lexer::tokenization :: std::string -> std::vector <Token>
+		*/
 		std::vector <Token> tokenization(std::string source)
 		{
-			const long length = source.length();
 			Token lastToken {NUL, 0};
 			std::vector <Token> tokens;
-			
-			for (int i = 0; i < length; ++i)
-			{
-				const char ch = source.at(i);
-				const TokenKind thisTokenKind = getCharKind(ch);
+			std::stack <long> loops;
+			long loopID {0};
 
-				if (lastToken.tokenKind != thisTokenKind
-					or thisTokenKind == LOS
-					or thisTokenKind == LOE
-					or thisTokenKind == INP
-					or thisTokenKind == OUP)
+			auto addToken = [&loopID, &loops](Token token, std::vector <Token> list)
+			-> std::vector <Token>
+			{
+				if (!isIgnorableToken(token))
 				{
-					tokens.push_back(lastToken);
-					lastToken.tokenKind  = thisTokenKind;
-					lastToken.operNumber = 0;
-				}	
+					if (token.tokenKind == LOS)
+					{
+						loops.push(loopID);
+						list.push_back({token.tokenKind, loopID});
+						++loopID;
+					}
+					else if (token.tokenKind == LOE)
+					{
+						list.push_back({token.tokenKind, loops.top()});
+						loops.pop();
+					}
+					else
+					{
+						list.push_back({token.tokenKind, token.operNumber});
+					}
+				}
+				return list;
+			};
+
+			for (const char ch : source)
+			{
+				const TokenKind thisTokenKind = getCharKind(ch);
 				
-				if (   ch == '<'
-					or ch == '-')
+				if (thisTokenKind == lastToken.tokenKind
+				and (	thisTokenKind == MOV 
+					 or thisTokenKind == ADD))
 				{
-					--lastToken.operNumber;
+					lastToken = mergeToken(lastToken, ch);
 				}
 				else
 				{
-					++lastToken.operNumber;
+					tokens = addToken(lastToken, tokens);
+					lastToken = {thisTokenKind, 0};
+					if (thisTokenKind == MOV or thisTokenKind == ADD)
+					{
+						lastToken = mergeToken(lastToken, ch);	
+					}
 				}
+				
 			}
-			
-			tokens.push_back(lastToken);
-
-			long len 	= tokens.size();
-			long loopID {0};
-			std::stack <long> loops;
-
-			for (int i = 0; i < len; ++i)
-			{
-				Token & thisToken = tokens.at(i);
-				if (thisToken.tokenKind == ADD
-					and thisToken.operNumber == 0)
-				{
-					tokens.erase(tokens.begin() + i);
-					--i;
-					--len;
-				}
-				else if (thisToken.tokenKind == LOS)
-				{
-					thisToken.operNumber = loopID;
-					loops.push(loopID);
-					++loopID;
-				}
-				else if (thisToken.tokenKind == LOE)
-				{
-					thisToken.operNumber = loops.top();
-					loops.pop();
-				}
-
-			}
-
+			tokens = addToken(lastToken, tokens);
 			return tokens;
 		}
 	}
