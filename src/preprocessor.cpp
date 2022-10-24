@@ -3,24 +3,36 @@ namespace bfc
 {
 	namespace preprocessor
 	{
-		void checkLoop(int loopDepth)
+		/*
+		bfc::preprocessor::checkLoop :: long int -> void
+		Check if the loop is mismatch. If so, throw a exception
+		with the type of `std::string'.
+		*/
+		void checkLoop(const long loopDepth)
 		{
 			if (loopDepth < 0)
 			{
-				std::cerr << "Error: Loop mismatch" << std::endl
-						  << -loopDepth	<< " more `[` requested.";
-				exit(-1);
+				throw std::string("Error: Loop mismatch. ")
+					+ std::to_string(-loopDepth)
+					+ "more `[' requested.";
 			}
 			else if (loopDepth > 0)
 			{
-				std::cerr << "Error: Loop mismatch" << std::endl
-						  << loopDepth	<< " more `]` requested.";
-				exit(-1);
+				throw std::string("Error: Loop mismatch. ")
+				  	 + std::to_string(loopDepth)
+					 + "more `]' requested.";
 			}
-			return ;
+			else
+			{
+				return ;
+			}
 		}
 
-		inline bool isBfChar(char ch)
+		/*
+		bfc::preprocessor::isBfChar :: char -> bool
+		Check if the char is a defined BrainFuck command.
+		*/
+		bool isBfChar(const char ch)
 		{
 			if (   ch == '<'
 				or ch == '>'
@@ -33,35 +45,49 @@ namespace bfc
 			{
 				return true;
 			}
-			return false;
+			else
+			{
+				return false;
+			}
 		}
 
-		std::string preProcess(std::string source)
+		/*
+		bfc::preprocessor::preProcess :: std::string -> std::string
+		Accept a string of source code and return another string
+		without undefined BrainFuck command. Moreover, when there is
+		an unsolvable problem in the source, like loop mismatch, the
+		function will print the error message and end the program.
+		*/
+		std::string preProcess(const std::string source)
 		{
-			const long length = source.length();
-			long loopDepth   {0};
-			std::string result {};
+			long loopDepth     {0};
+			std::string result { };
 
-			for (int i = 0; i < length; ++i)
+			for (const char ch : source)
 			{
-				const char ch = source.at(i);
-				if (!isBfChar(ch))
+				if (isBfChar(ch))
 				{
-					continue;
-				}
-
-				result.push_back(ch);
-
-				if (ch == '[')
-				{
-					++loopDepth;
-				}
-				else if (ch == ']')
-				{
-					--loopDepth;
+					result.push_back(ch);
+					if (ch == '[')
+					{
+						++loopDepth;
+					}
+					else if (ch == ']')
+					{
+						--loopDepth;
+					}
 				}
 			}
-			checkLoop(loopDepth);
+
+			try
+			{
+				checkLoop(loopDepth);
+			}
+			catch (std::string errorMsg)
+			{
+				std::cerr << errorMsg;
+				exit(-1);
+			}
 			
 			return result;
 		}
